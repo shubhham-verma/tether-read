@@ -11,7 +11,7 @@ export default function Navigation() {
             </NavbarBrand>
             <NavbarToggle />
             <NavbarCollapse>
-                <NavbarLink href="/" active >Home</NavbarLink>
+                <NavbarLink href="/" active >Home </NavbarLink>
                 <NavbarLink href="/upload">Upload</NavbarLink>
                 <NavbarLink href="/about">About</NavbarLink>
             </NavbarCollapse>
