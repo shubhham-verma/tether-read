@@ -1,8 +1,12 @@
 import React from 'react'
+import Navbar from '@/components/Navbar-home'
 
-function ReaderPage({params}) {
+function ReaderPage({ params }) {
   return (
-    <div>ReaderPage: {params.bookid}</div>
+    <>
+      <Navbar />
+      <div>ReaderPage: {params.bookid}</div>
+    </>
   )
 }
 

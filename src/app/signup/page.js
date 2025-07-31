@@ -1,8 +1,12 @@
 import React from 'react'
+import Navbar from '@/components/Navbar-login'
 
 function SignUp() {
   return (
-    <div>SignUp</div>
+    <>
+      <Navbar />
+      <div>SignUp</div>
+    </>
   )
 }
 

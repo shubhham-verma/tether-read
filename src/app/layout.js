@@ -1,7 +1,5 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeModeScript } from "flowbite-react";
-import  Navbar  from "@/components/Navbar";
 
 export const metadata = {
   title: "Create Next App",
@@ -16,7 +14,6 @@ export default function RootLayout({ children }) {
         
       </head>
       <body>
-        <Navbar/>
         {children}
       </body>
     </html>

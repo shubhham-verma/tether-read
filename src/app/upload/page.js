@@ -1,8 +1,12 @@
 import React from 'react'
+import Navbar from '@/components/Navbar-home'
 
 function UploadPage() {
   return (
-    <div>UploadPage</div>
+    <>
+      <Navbar />
+      <div>UploadPage</div>
+    </>
   )
 }
 

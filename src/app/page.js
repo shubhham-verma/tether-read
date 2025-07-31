@@ -1,6 +1,10 @@
+import Navbar from '@/components/Navbar-login'
 
 export default function Home() {
   return (
-   <div>Home page </div>
+    <>
+      <Navbar />
+      <div>Landing page </div>
+    </>
   );
 }
