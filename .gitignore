@@ -42,3 +42,5 @@ next-env.d.ts
 
 # flowbite folder
 .flowbite-react/
+
+tether-read-project-summary.json

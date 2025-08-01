@@ -1,5 +1,7 @@
 import "./globals.css";
 import { ThemeModeScript } from "flowbite-react";
+import { Toaster } from 'react-hot-toast'
+
 
 export const metadata = {
   title: "Create Next App",
@@ -11,9 +13,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <ThemeModeScript />
-        
       </head>
       <body>
+        <Toaster position="top-right" reverseOrder={false} />
         {children}
       </body>
     </html>

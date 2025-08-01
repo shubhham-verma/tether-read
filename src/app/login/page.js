@@ -10,6 +10,8 @@ import z from 'zod';
 import Navbar from '@/components/Navbar-login'
 import { Button, Label, TextInput, HelperText, Spinner } from "flowbite-react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
+import toast from 'react-hot-toast'
+
 
 
 function Login() {
@@ -54,6 +56,7 @@ function Login() {
       setemailHelperText("");
 
       await signInWithEmailAndPassword(auth, email, password);
+      toast.success('Login successful!')
       router.push('/shelf');
 
     }
@@ -75,8 +78,23 @@ function Login() {
           setpasswordHelperText([]);
         }
       }
-      else {
-        console.log(error);
+      else {  // must be auth error
+        console.log(error.code);
+        let message = 'Something went wrong'
+        switch (error.code) {
+          case 'auth/user-not-found':
+            message = 'No user found with this email'
+            break
+          case 'auth/invalid-credential':
+            message = 'Incorrect email or password'
+            break
+          case 'auth/too-many-requests':
+            message = 'Too many failed attempts. Try again later'
+            break
+          default:
+            break
+        }
+        toast.error(message)
       }
     }
     finally {
@@ -149,10 +167,10 @@ function Login() {
                   {showPassword ? <HiEyeOff className="h-5 w-5" /> : <HiEye className="h-5 w-5" />}
                 </button>
               </div>
-              <Button type="submit" className="w-full" onClick={handleLogin} disabled={loading}>
+              <Button type="submit"color="teal"  className="w-full" onClick={handleLogin} disabled={loading}>
                 {loading ? (
                   <div className="flex items-center gap-2">
-                    <Spinner  color="failure" aria-label='login loading spinner'/>
+                    <Spinner color="failure" aria-label='login loading spinner' />
                   </div>
                 ) : (
                   "Login"
@@ -162,7 +180,7 @@ function Login() {
 
             <p className="mt-4 text-white">
               Already a member?
-              <span className="text-blue-200 underline ml-2">
+              <span className="text-green-200 underline ml-2">
                 <Link href="/signup">Sign Up</Link>
               </span>
             </p>
