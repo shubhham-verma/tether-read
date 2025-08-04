@@ -1,17 +1,18 @@
 'use client';
 
-import React from 'react'
 import { useAuth } from "@/context/AuthContext";
+import Skeleton from '@/components/Skeleton';
 
 
 function UploadPage() {
 
   const { loading } = useAuth();
 
+
   if (loading)
-    return (<>
-      <div className='text-5xl' > Skeleton component </div>
-    </>)
+    return (
+      <Skeleton page='upload' />
+    )
 
   else
     return (<>

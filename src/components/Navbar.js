@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 
 import toast from 'react-hot-toast';
+import Skeleton from "./Skeleton";
 
 export default function Navigation() {
     const { user, loading, logout } = useAuth();
@@ -12,7 +13,7 @@ export default function Navigation() {
     const [menuOpen, setMenuOpen] = useState(false);
 
 
-    const handleLogout = async () => {
+    const handleSignout = async () => {
         try {
 
             await logout();
@@ -26,21 +27,8 @@ export default function Navigation() {
 
     if (loading)
         return (
-            <>
-                <div role="status" className=" animate-pulse px-8 ">
-                    <div className="flex justify-between w-full py-4">
-                        <div className="h-2.5 w-1/3 bg-green-200 dark:bg-green-700 rounded-full"></div>
-                        <div className="h-2.5 w-1/4 bg-green-200 dark:bg-green-700 rounded-full"></div>
-                    </div>
-
-                    <div className="flex justify-between w-full">
-                        <div className="h-2.5 w-1/4 bg-green-200 dark:bg-green-700 rounded-full"></div>
-                        <div className="h-2.5 w-1/3 bg-green-200 dark:bg-green-700 rounded-full"></div>
-                    </div>
-                </div>
-            </>
+            <Skeleton page='navbar' />
         );
-
 
     else
         return (
@@ -69,15 +57,15 @@ export default function Navigation() {
                                              hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}> Shelf</a>
                                         </li>
                                         <li>
-                                            <a href="/shelf" className={`block py-2 px-3 rounded-sm ${pathname === "/upload" ? "text-green-700 dark:text-green-500 font-bold" : "text-gray-900 dark:text-white"}
+                                            <a href="/upload" className={`block py-2 px-3 rounded-sm ${pathname === "/upload" ? "text-green-700 dark:text-green-500 font-bold" : "text-gray-900 dark:text-white"}
                                              hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}> Upload</a>
                                         </li>
                                         <li>
-                                            <a href="/shelf" className={`block py-2 px-3 rounded-sm ${pathname === "/" ? "text-green-700 dark:text-green-500 font-bold" : "text-gray-900 dark:text-white"}
+                                            <a href="#" className={`block py-2 px-3 rounded-sm ${pathname === "/" ? "text-green-700 dark:text-green-500 font-bold" : "text-gray-900 dark:text-white"}
                                              hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}> Read</a>
                                         </li>
                                         <li>
-                                            <a href="#" className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" onClick={handleLogout}>Sign Out</a>
+                                            <a href="#" className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" onClick={handleSignout}>Sign Out</a>
                                         </li>
                                     </>
                                     :
