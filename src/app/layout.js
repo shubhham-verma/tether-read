@@ -1,6 +1,8 @@
 import "./globals.css";
 import { ThemeModeScript } from "flowbite-react";
 import { Toaster } from 'react-hot-toast'
+import { AuthProvider } from "@/context/AuthContext";
+import Navbar from '@/components/Navbar'
 
 
 export const metadata = {
@@ -15,8 +17,11 @@ export default function RootLayout({ children }) {
         <ThemeModeScript />
       </head>
       <body>
-        <Toaster position="top-right" reverseOrder={false} />
-        {children}
+        <AuthProvider>
+          <Navbar />
+          <Toaster position="top-right" reverseOrder={false} />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

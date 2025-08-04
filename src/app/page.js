@@ -1,10 +1,9 @@
-import Navbar from '@/components/Navbar-login'
 
 export default function Home() {
   return (
     <>
-      <Navbar />
-      <div>Landing page </div>
+
+      <div className='text-9xl mx-auto'> Landing page </div>
     </>
   );
 }

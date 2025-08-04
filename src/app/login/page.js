@@ -7,7 +7,6 @@ import { auth, googleProvider } from '@/lib/firebase';
 import z from 'zod';
 
 
-import Navbar from '@/components/Navbar-login'
 import { Button, Label, TextInput, HelperText, Spinner } from "flowbite-react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import toast from 'react-hot-toast'
@@ -119,8 +118,6 @@ function Login() {
 
   return (
     <>
-      <Navbar />
-
       <main className="flex flex-col min-h-screen bg-gray-700">
 
         <div className="flex items-center justify-center flex-[1] px-4">
