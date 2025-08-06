@@ -18,6 +18,7 @@ export default function Navigation() {
 
             await logout();
             router.push('/');
+            router.refresh();
 
         } catch (error) {
             console.log({ logout_error: error });
