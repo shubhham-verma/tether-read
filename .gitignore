@@ -44,3 +44,5 @@ next-env.d.ts
 .flowbite-react/
 
 tether-read-project-summary.json
+
+public/sample.epub

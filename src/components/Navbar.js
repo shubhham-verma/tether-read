@@ -62,7 +62,7 @@ export default function Navigation() {
                                              hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}> Upload</a>
                                         </li>
                                         <li>
-                                            <a href="#" className={`block py-2 px-3 rounded-sm ${pathname === "/" ? "text-green-700 dark:text-green-500 font-bold" : "text-gray-900 dark:text-white"}
+                                            <a href="/reader/123" className={`block py-2 px-3 rounded-sm ${pathname === "/" ? "text-green-700 dark:text-green-500 font-bold" : "text-gray-900 dark:text-white"}
                                              hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}> Read</a>
                                         </li>
                                         <li>
