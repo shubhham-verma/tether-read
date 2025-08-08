@@ -72,23 +72,35 @@ function ReaderPage({ params }) {
         if (activeChapter) {
           setActiveChapterHref(activeChapter.href);
         }
-
-        // console.log('current', currentHref);
-        // console.log('active', activeChapter);
-        // console.log('activehref', activeChapterHref);
-
-        // console.log(tocRef.current);
-
       });
 
       rendition.display();
 
-      // book.loaded.navigation.then((nav) => {
-      //   setToc(flattenTOC(nav.toc));
-      // });
+      rendition.on("rendered", (section) => {
+        const contents = rendition.getContents();
+        contents.forEach((content) => {
+          content.document.addEventListener("keydown", handleKeyDown);
+        });
+      });
+
+
+
+      const handleKeyDown = (e) => {
+        if (!renditionRef.current) return;
+        if (e.key === "ArrowRight") {
+          renditionRef.current?.next();
+        }
+        if (e.key === "ArrowLeft") {
+          renditionRef.current?.prev();
+        }
+      }
+
+      document.addEventListener("keydown", handleKeyDown);
+
 
       return () => {
         rendition.destroy();
+        document.removeEventListener("keydown", handleKeyDown);
       };
     }
   }, [user, loading, router]);
@@ -166,7 +178,7 @@ function ReaderPage({ params }) {
               </div>}
 
             {(currentPage === -1 || totalPages === -1) &&
-              <div role="status" class="max-w-sm animate-pulse">
+              <div role="status" className="max-w-sm animate-pulse">
                 <div className="h-2.5 bg-gray-200 rounded-full dark:bg-green-600 w-14 my-4"></div>
               </div>
             }
