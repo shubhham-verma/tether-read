@@ -67,6 +67,9 @@ function ReaderPage({ params }) {
         setProgress(Number((percentage * 100).toFixed(2)));
         setCurrentPage(book.locations.locationFromCfi(location.start.cfi));
 
+        localStorage.setItem("lastReadCfi", location.start.cfi);
+
+
         const currentHref = location.start.href;
         const activeChapter = tocRef.current.find(item => currentHref.includes(item.href));
         if (activeChapter) {
@@ -74,7 +77,14 @@ function ReaderPage({ params }) {
         }
       });
 
-      rendition.display();
+      // rendition.display();
+
+      const savedCfi = localStorage.getItem("lastReadCfi");
+      if (savedCfi) {
+        rendition.display(savedCfi);
+      } else {
+        rendition.display();
+      }
 
       rendition.on("rendered", (section) => {
         const contents = rendition.getContents();
