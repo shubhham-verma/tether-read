@@ -217,7 +217,7 @@ function Signup() {
             alt="Google"
             className="h-5 w-5 mx-2"
           />
-          Sign up with Google
+          Continue with Google
         </Button>
 
 
