@@ -23,11 +23,11 @@ export default async function handler(req, res) {
         } catch (error) {
             if (error.code === "auth/id-token-expired") {
                 return res.status(401).json({
-                    error: "Firebase ID token expired. Please refresh your login and try again.",
+                    error: "Unauthorized: Firebase ID token expired. Please refresh your login and try again.",
                 });
             }
             else if (error.code === "auth/argument-error") {
-                return res.status(400).json({ error: "Invalid or malformed token." });
+                return res.status(400).json({ error: "Unauthorized: Invalid or malformed token." });
             }
             else {
                 console.error("Error in GET /books:", error);

@@ -1,6 +1,7 @@
 import formidable from "formidable";
 import { connectDB } from "@/lib/mongodb";
 import Book from "@/models/book";
+import { admin } from '@/lib/firebaseadmin';
 
 export const config = {
     api: {
@@ -15,6 +16,15 @@ export default async function handler(req, res) {
 
     try {
 
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ error: "Unauthorized: Please provide a valid bearer token" });
+        }
+
+        const idToken = authHeader.split("Bearer ")[1];
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const uid = decodedToken.uid;
+
         const form = formidable({ multiples: false });
 
         const [fields, files] = await new Promise((resolve, reject) => {
@@ -28,9 +38,6 @@ export default async function handler(req, res) {
 
         const book = files.book;
 
-        // console.log("Fields object:", fields);
-        // console.log(book);
-
         if (!book)
             return res.status(400).json({ error: "No file uploaded" });
 
@@ -40,9 +47,8 @@ export default async function handler(req, res) {
 
         const titleVal = Array.isArray(fields.title) ? fields.title[0] : fields.title;
         const authorVal = Array.isArray(fields.author) ? fields.author[0] : fields.author;
-        const userIdVal = Array.isArray(fields.userId) ? fields.userId[0] : fields.userId;
-
-        // console.log("userIdVal ", userIdVal);
+        // const userIdVal = Array.isArray(fields.userId) ? fields.userId[0] : fields.userId;
+        const userIdVal = uid;
 
         await connectDB();
         const result = await Book.create({
@@ -61,8 +67,18 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error("Error uploading file: ", error);
-        return res.status(500).json({ error: "internal server error" });
+        if (error.code === "auth/id-token-expired") {
+            return res.status(401).json({
+                error: "Unauthorized: Firebase ID token expired. Please refresh your login and try again.",
+            });
+        }
+        else if (error.code === "auth/argument-error") {
+            return res.status(400).json({ error: "Unauthorized: Invalid or malformed token." });
+        }
+        else {
+            console.error("Error uploading file: ", error);
+            return res.status(500).json({ error: "internal server error" });
+        }
     }
 
 }
