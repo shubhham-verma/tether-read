@@ -45,17 +45,13 @@ export default async function handler(req, res) {
         // const dummyR2Url = `https://dummy-r2-url.com/${file.originalFilename}`;
         const dummyR2Url = `https://dummy-r2-url.com/my-ebook.epub`;
 
-        const titleVal = Array.isArray(fields.title) ? fields.title[0] : fields.title;
-        const authorVal = Array.isArray(fields.author) ? fields.author[0] : fields.author;
-        // const userIdVal = Array.isArray(fields.userId) ? fields.userId[0] : fields.userId;
-        const userIdVal = uid;
-
         await connectDB();
         const result = await Book.create({
-            title: titleVal,
-            author: authorVal,
-            userId: userIdVal,
+            title: Array.isArray(fields.title) ? fields.title[0] : fields.title,
+            author: Array.isArray(fields.author) ? fields.author[0] : fields.author,
+            userId: uid,
             fileUrl: dummyR2Url,
+            progress: 0,
             uploadedAt: new Date()
         })
 
