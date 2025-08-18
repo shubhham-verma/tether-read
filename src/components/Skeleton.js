@@ -156,11 +156,58 @@ function Skeleton({ page }) {
                     <div className="h-2 bg-green-200 rounded-full dark:bg-green-700 mb-2.5"></div>
                     <span className="sr-only">Loading...</span>
                 </div>
-
             </>);
             break;
-        case 'signup':
+
+        case 'landing':
             return (<>
+                {/* Hero Section Skeleton */}
+                <section className="animate-pulse py-20 px-4">
+                    <div className="max-w-6xl mx-auto text-center">
+                        {/* Title Skeleton */}
+                        <div className="h-16 bg-green-700 rounded-lg mb-6 max-w-md mx-auto"></div>
+
+                        {/* Subtitle Skeleton */}
+                        <div className="space-y-3 mb-8 max-w-3xl mx-auto">
+                            <div className="h-6 bg-green-700 rounded mx-auto"></div>
+                            <div className="h-6 bg-green-700 rounded mx-auto w-3/4"></div>
+                        </div>
+
+                        {/* Buttons Skeleton */}
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <div className="h-14 w-40 bg-green-900 rounded-lg"></div>
+                            <div className="h-14 w-32 bg-green-700 rounded-lg"></div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Features Section Skeleton */}
+                <section className=" animate-pulse  px-4">
+                    <div className="max-w-6xl mx-auto">
+                        {/* Section Title Skeleton */}
+                        <div className="h-10 rounded-lg mb-16 max-w-2xl mx-auto"></div>
+
+                        {/* Feature Cards Grid */}
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {[1, 2, 3, 4].map((item) => (
+                                <div key={item} className="text-center p-6">
+                                    {/* Icon Skeleton */}
+                                    <div className="bg-green-900 w-16 h-16 rounded-full mx-auto mb-4"></div>
+
+                                    {/* Feature Title Skeleton */}
+                                    <div className="h-6 bg-green-700 rounded mb-3 w-3/4 mx-auto"></div>
+
+                                    {/* Feature Description Skeleton */}
+                                    <div className="space-y-2">
+                                        <div className="h-4 bg-green-700 rounded"></div>
+                                        <div className="h-4 bg-green-700 rounded w-5/6 mx-auto"></div>
+                                        <div className="h-4 bg-green-700 rounded w-4/5 mx-auto"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
             </>);
             break;
         default:
