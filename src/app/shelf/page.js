@@ -7,7 +7,11 @@ import Skeleton from '@/components/Skeleton';
 import Link from "next/link";
 
 
-import { FaBook, FaSearch, FaFilter, FaSort, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa';
+import {
+    FaBook, FaSearch, FaFilter, FaSort,
+    FaChevronLeft, FaChevronRight, FaPlus
+} from 'react-icons/fa';
+import { MdNavigateNext } from "react-icons/md";
 
 
 function shelf() {
@@ -24,9 +28,8 @@ function shelf() {
     const [currentPage, setCurrentPage] = useState(1);
     const [pageInfo, setPageInfo] = useState({});
     const [width, setWidth] = useState(0);
-    // const [maxVisiblePages, setMaxVisiblePages] = useState(5);
-
     const maxVisiblePages = width < 768 ? 3 : 15;
+    const [tempSearch, setTempSearch] = useState("");
 
 
     useEffect(() => {
@@ -34,68 +37,62 @@ function shelf() {
             router.replace('/login');
     }, [user, loading, router]);
 
-    // useEffect(() => {
-    //     const fetchBooks = async () => {
-    //         setPageLoading(true);
-    //         // Simulate loading delay
-    //         await new Promise(resolve => setTimeout(resolve, 1000));
-    //         setBooks(mockApiResponse.books);
-    //         setPageInfo(mockApiResponse.info);
-    //         setPageLoading(false);
-    //     };
+    const fetchBooks = async () => {
+        try {
+            setPageLoading(true);
 
-    //     fetchBooks();
-    // }, [currentPage, sortBy, sortOrder]);
+            if (!user) return;
 
+            const token = await user.getIdToken();
+
+            const params = new URLSearchParams({
+                page: currentPage,
+                sort: sortBy,
+                order: sortOrder,
+                search: searchTerm,
+                filter: filterBy
+            })
+
+            const res = await fetch(
+                `/api/books?${params.toString()}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch books");
+            }
+
+            const data = await res.json();
+
+            // your API already returns { info, books, total }
+
+            const normalizedBooks = data.books.map(book => {
+                if (book.progress && book.progress.includes("/")) {
+                    const [currentPage, totalPages] = book.progress.split("/").map(Number);
+                    const percentage = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0;
+                    return { ...book, progress: percentage };
+                }
+                return { ...book, progress: 0 }; // fallback if no progress
+            });
+
+            setBooks(normalizedBooks);
+            setPageInfo(data.info);
+        } catch (error) {
+            console.error("Error fetching books:", error);
+        } finally {
+            setPageLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchBooks = async () => {
-            try {
-                setPageLoading(true);
-
-                if (!user) return; // no user, no request
-
-                const token = await user.getIdToken(); // 🔑 Firebase ID token
-
-                const res = await fetch(
-                    `/api/books?page=${currentPage}&sort=${sortBy}&order=${sortOrder}`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${token}`, // pass token
-                        },
-                    }
-                );
-
-                if (!res.ok) {
-                    throw new Error("Failed to fetch books");
-                }
-
-                const data = await res.json();
-
-                // your API already returns { info, books, total }
-
-                const normalizedBooks = data.books.map(book => {
-                    if (book.progress && book.progress.includes("/")) {
-                        const [currentPage, totalPages] = book.progress.split("/").map(Number);
-                        const percentage = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0;
-                        return { ...book, progress: percentage };
-                    }
-                    return { ...book, progress: 0 }; // fallback if no progress
-                });
-
-                setBooks(normalizedBooks);
-                setPageInfo(data.info);
-            } catch (error) {
-                console.error("Error fetching books:", error);
-            } finally {
-                setPageLoading(false);
-            }
-        };
-
         if (user) fetchBooks();
-    }, [user, currentPage, sortBy, sortOrder]);
+    }, [user, currentPage, sortBy, sortOrder, filterBy, searchTerm]);
 
 
     // code to get the screen size of the device
@@ -144,19 +141,6 @@ function shelf() {
 
     }, [currentPage, pageInfo.totalPages, maxVisiblePages]);
 
-
-    const filteredBooks = books.filter(book => {
-        const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            book.author.toLowerCase().includes(searchTerm.toLowerCase());
-
-        if (filterBy === 'all') return matchesSearch;
-        if (filterBy === 'unread') return matchesSearch && book.progress === 0;
-        if (filterBy === 'reading') return matchesSearch && book.progress > 0 && book.progress < 100;
-        if (filterBy === 'completed') return matchesSearch && book.progress === 100;
-
-        return matchesSearch;
-    });
-
     const handleBookClick = (bookId, userId) => {
         console.log(`${bookId} clicked by ${userId}`);
     };
@@ -197,16 +181,20 @@ function shelf() {
                         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                             <div className="grid md:grid-cols-4 gap-4">
                                 {/* Search */}
-                                <div className="relative">
-                                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                <form className="relative" action={undefined} onSubmit={(e) => {
+                                    e.preventDefault();
+                                    setSearchTerm(tempSearch);
+                                    fetchBooks();
+                                }} >
+                                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" type="button"/>
                                     <input
                                         type="text"
                                         placeholder="Search books..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        value={tempSearch}
+                                        onChange={(e) => setTempSearch(e.target.value)}
                                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-gray-600 "
                                     />
-                                </div>
+                                </form>
 
                                 {/* Sort */}
                                 <div className="relative">
@@ -257,7 +245,7 @@ function shelf() {
                         </div>
 
                         {/* Books Grid */}
-                        {filteredBooks.length === 0 ? (
+                        {books.length === 0 ? (
                             <div className="text-center py-16">
                                 <FaBook className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                                 <h3 className="text-xl font-semibold text-gray-600 mb-2">
@@ -272,7 +260,7 @@ function shelf() {
                             </div>
                         ) : (
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                                {filteredBooks.map((book) => (
+                                {books.map((book) => (
                                     <div
                                         key={book._id}
                                         onClick={() => handleBookClick(book._id, book.userId)}
