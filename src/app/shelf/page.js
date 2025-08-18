@@ -15,107 +15,6 @@ function shelf() {
     const { user, loading } = useAuth();
     const router = useRouter();
 
-    const mockApiResponse = {
-        "info": {
-            "page": 1,
-            "limit": 50,
-            "total": 4,
-            "totalPages": 10,
-            "hasNext": true,
-            "hasPrev": true,
-            "sort": {
-                "by": "createdAt",
-                "order": "desc"
-            }
-        },
-        "total": 30,
-        "books": [
-            {
-                "_id": "689e21c1a1abadb7f6eb58f4",
-                "title": "The Midnight's Children 2",
-                "author": "Salman Rushdie",
-                "userId": "k0qggHKbesYonwAi43keExx2ugy1",
-                "fileUrl": "https://dummy-r2-url.com/my-ebook.epub",
-                "progress": 0,
-                "createdAt": "2025-08-14T17:49:53.154Z",
-                "updatedAt": "2025-08-14T17:49:53.154Z",
-                "__v": 0
-            }, {
-                "_id": "689e21c1a1abadb7f6eb58f4",
-                "title": "The Midnight's Children 2",
-                "author": "Salman Rushdie",
-                "userId": "k0qggHKbesYonwAi43keExx2ugy1",
-                "fileUrl": "https://dummy-r2-url.com/my-ebook.epub",
-                "progress": 0,
-                "createdAt": "2025-08-14T17:49:53.154Z",
-                "updatedAt": "2025-08-14T17:49:53.154Z",
-                "__v": 0
-            }, {
-                "_id": "689e21c1a1abadb7f6eb58f4",
-                "title": "The Midnight's Children 2",
-                "author": "Salman Rushdie",
-                "userId": "k0qggHKbesYonwAi43keExx2ugy1",
-                "fileUrl": "https://dummy-r2-url.com/my-ebook.epub",
-                "progress": 0,
-                "createdAt": "2025-08-14T17:49:53.154Z",
-                "updatedAt": "2025-08-14T17:49:53.154Z",
-                "__v": 0
-            }, {
-                "_id": "689e21c1a1abadb7f6eb58f4",
-                "title": "The Midnight's Children 2",
-                "author": "Salman Rushdie",
-                "userId": "k0qggHKbesYonwAi43keExx2ugy1",
-                "fileUrl": "https://dummy-r2-url.com/my-ebook.epub",
-                "progress": 0,
-                "createdAt": "2025-08-14T17:49:53.154Z",
-                "updatedAt": "2025-08-14T17:49:53.154Z",
-                "__v": 0
-            }, {
-                "_id": "689e21c1a1abadb7f6eb58f4",
-                "title": "The Midnight's Children 2",
-                "author": "Salman Rushdie",
-                "userId": "k0qggHKbesYonwAi43keExx2ugy1",
-                "fileUrl": "https://dummy-r2-url.com/my-ebook.epub",
-                "progress": 0,
-                "createdAt": "2025-08-14T17:49:53.154Z",
-                "updatedAt": "2025-08-14T17:49:53.154Z",
-                "__v": 0
-            }, {
-                "_id": "689e21c1a1abadb7f6eb58f4",
-                "title": "The Midnight's Children 2",
-                "author": "Salman Rushdie",
-                "userId": "k0qggHKbesYonwAi43keExx2ugy1",
-                "fileUrl": "https://dummy-r2-url.com/my-ebook.epub",
-                "progress": 0,
-                "createdAt": "2025-08-14T17:49:53.154Z",
-                "updatedAt": "2025-08-14T17:49:53.154Z",
-                "__v": 0
-            },
-            {
-                "_id": "689de6fba1abadb7f6eb58b0",
-                "title": "Children Of Time 2",
-                "author": "Ruskin Bond",
-                "userId": "k0qggHKbesYonwAi43keExx2ugy1",
-                "fileUrl": "https://dummy-r2-url.com/my-ebook.epub",
-                "progress": 67,
-                "createdAt": "2025-08-14T13:39:07.560Z",
-                "updatedAt": "2025-08-14T13:39:07.560Z",
-                "__v": 0
-            },
-            {
-                "_id": "689de41fa1abadb7f6eb58a5",
-                "title": "Children Of Time",
-                "author": "Ruskin Bond",
-                "userId": "k0qggHKbesYonwAi43keExx2ugy1",
-                "fileUrl": "https://dummy-r2-url.com/my-ebook.epub",
-                "progress": 100,
-                "createdAt": "2025-08-14T13:26:55.902Z",
-                "updatedAt": "2025-08-14T13:26:55.902Z",
-                "__v": 0
-            }
-        ]
-    };
-
     const [books, setBooks] = useState([]);
     const [pageLoading, setPageLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -135,18 +34,69 @@ function shelf() {
             router.replace('/login');
     }, [user, loading, router]);
 
+    // useEffect(() => {
+    //     const fetchBooks = async () => {
+    //         setPageLoading(true);
+    //         // Simulate loading delay
+    //         await new Promise(resolve => setTimeout(resolve, 1000));
+    //         setBooks(mockApiResponse.books);
+    //         setPageInfo(mockApiResponse.info);
+    //         setPageLoading(false);
+    //     };
+
+    //     fetchBooks();
+    // }, [currentPage, sortBy, sortOrder]);
+
+
     useEffect(() => {
         const fetchBooks = async () => {
-            setPageLoading(true);
-            // Simulate loading delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            setBooks(mockApiResponse.books);
-            setPageInfo(mockApiResponse.info);
-            setPageLoading(false);
+            try {
+                setPageLoading(true);
+
+                if (!user) return; // no user, no request
+
+                const token = await user.getIdToken(); // 🔑 Firebase ID token
+
+                const res = await fetch(
+                    `/api/books?page=${currentPage}&sort=${sortBy}&order=${sortOrder}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`, // pass token
+                        },
+                    }
+                );
+
+                if (!res.ok) {
+                    throw new Error("Failed to fetch books");
+                }
+
+                const data = await res.json();
+
+                // your API already returns { info, books, total }
+
+                const normalizedBooks = data.books.map(book => {
+                    if (book.progress && book.progress.includes("/")) {
+                        const [currentPage, totalPages] = book.progress.split("/").map(Number);
+                        const percentage = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0;
+                        return { ...book, progress: percentage };
+                    }
+                    return { ...book, progress: 0 }; // fallback if no progress
+                });
+
+                setBooks(normalizedBooks);
+                setPageInfo(data.info);
+            } catch (error) {
+                console.error("Error fetching books:", error);
+            } finally {
+                setPageLoading(false);
+            }
         };
 
-        fetchBooks();
-    }, [currentPage, sortBy, sortOrder]);
+        if (user) fetchBooks();
+    }, [user, currentPage, sortBy, sortOrder]);
+
 
     // code to get the screen size of the device
     useEffect(() => {
