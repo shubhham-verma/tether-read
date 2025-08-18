@@ -3,6 +3,13 @@ import Book from "@/models/book";
 import { admin } from '@/lib/firebaseadmin';
 import mongoose from "mongoose";
 
+const ALLOWED_SORT_FIELDS = {
+    createdAt: "createdAt",
+    updatedAt: "updatedAt",
+    title: "title",
+    author: "author",
+};
+
 export default async function handler(req, res) {
 
     try {
@@ -20,8 +27,51 @@ export default async function handler(req, res) {
         const { bookId, title, author, progress } = req.body;
 
         if (req.method === "GET") {
-            const books = await Book.find({ userId: uid }).lean();
-            return res.status(200).json({ total: books.length, books });
+
+            const pageNum = Math.max(parseInt(req.query.page || "1", 10), 1);
+            const limitNum = Math.min(Math.max(parseInt(req.query.limit || "20", 10), 1), 50);
+            const sortField = ALLOWED_SORT_FIELDS[req.query.sort] || "createdAt";
+            const sortOrder = (req.query.order || "desc").toLowerCase() === "asc" ? 1 : -1;
+            const searchTerm = req.query.search?.trim() || "";
+
+            const sortObj = { [sortField]: sortOrder, _id: sortOrder };
+            const filter = { userId: uid };
+
+            if (searchTerm) {
+                filter.$or = [
+                    { title: { $regex: searchTerm, $options: "i" } },
+                    { author: { $regex: searchTerm, $options: "i" } }
+                ];
+            }
+
+            const total = await Book.countDocuments(filter);
+
+            let query = Book.find(filter)
+                .sort(sortObj)
+                .skip((pageNum - 1) * limitNum)
+                .limit(limitNum)
+                .lean();
+
+            if (sortField === "title" || sortField === "author") {
+                query = query.collation({ locale: "en", strength: 2 });
+            }
+
+            const books = await query;
+            const info = {
+                page: pageNum,
+                limit: limitNum,
+                total,
+                totalPages: Math.ceil(total / limitNum),
+                hasNext: pageNum * limitNum < total,
+                hasPrev: pageNum > 1,
+                sort: { by: sortField, order: sortOrder === 1 ? "asc" : "desc" }
+            }
+
+            return res.status(200).json({
+                info,
+                count: books.length,
+                books
+            });
         }
 
         else {
