@@ -33,6 +33,8 @@ export default async function handler(req, res) {
             const sortField = ALLOWED_SORT_FIELDS[req.query.sort] || "createdAt";
             const sortOrder = (req.query.order || "desc").toLowerCase() === "asc" ? 1 : -1;
             const searchTerm = req.query.search?.trim() || "";
+            const statusFilter = req.query.status?.toLowerCase() || "all";
+
 
             const sortObj = { [sortField]: sortOrder, _id: sortOrder };
             const filter = { userId: uid };
@@ -44,7 +46,6 @@ export default async function handler(req, res) {
                 ];
             }
 
-            const total = await Book.countDocuments(filter);
 
             let query = Book.find(filter)
                 .sort(sortObj)
@@ -56,7 +57,26 @@ export default async function handler(req, res) {
                 query = query.collation({ locale: "en", strength: 2 });
             }
 
-            const books = await query;
+            var books = await query;
+
+            if (statusFilter !== "all") {
+                books = books.filter(book => {
+                    if (!book.progress) return false;
+
+                    const [current, total] = book.progress.split("/").map(n => parseInt(n, 10));
+                    if (isNaN(current) || isNaN(total)) return false;
+
+                    if (statusFilter === "unread") return current === 0;
+                    if (statusFilter === "reading") return current > 0 && current < total;
+                    if (statusFilter === "completed") return current === total;
+
+                    return true;
+                });
+            }
+
+            const total = await books.length;
+
+
             const info = {
                 page: pageNum,
                 limit: limitNum,

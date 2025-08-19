@@ -11,7 +11,8 @@ import {
     FaBook, FaSearch, FaFilter, FaSort,
     FaChevronLeft, FaChevronRight, FaPlus
 } from 'react-icons/fa';
-import { MdNavigateNext } from "react-icons/md";
+import { RiDeleteBin6Fill } from "react-icons/ri";
+import toast from 'react-hot-toast'
 
 
 function shelf() {
@@ -50,7 +51,7 @@ function shelf() {
                 sort: sortBy,
                 order: sortOrder,
                 search: searchTerm,
-                filter: filterBy
+                status: filterBy
             })
 
             const res = await fetch(
@@ -90,12 +91,13 @@ function shelf() {
         }
     };
 
+    // Refetch book list on searching and filtering
     useEffect(() => {
         if (user) fetchBooks();
     }, [user, currentPage, sortBy, sortOrder, filterBy, searchTerm]);
 
 
-    // code to get the screen size of the device
+    // Get the screen size of the device
     useEffect(() => {
         setWidth(window.innerWidth);
         const handleResize = () => setWidth(window.innerWidth);
@@ -145,6 +147,41 @@ function shelf() {
         console.log(`${bookId} clicked by ${userId}`);
     };
 
+    const handleBookDelete = async (e, id) => {
+        e.preventDefault();
+        const confirmed = window.confirm("Are you sure you want to delete this book?");
+        if (!confirmed) return;
+
+        const previousBooks = [...books];
+        setBooks((prev) => prev.filter((book) => book._id !== id));
+
+
+        try {
+            const token = await user.getIdToken();
+            const res = await fetch("/api/books", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ bookId: id })
+            });
+
+            if (res.ok) {
+                toast.success("Book deleted successfully");
+            }
+            else {
+                setBooks(previousBooks);
+                toast.error('An error occured while deleting the file.');
+                console.error("Delete failed: ", await res.json());
+            }
+
+        } catch (error) {
+            setBooks(previousBooks);
+            console.error("error in deleting books: ", error);
+        }
+    };
+
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -173,7 +210,7 @@ function shelf() {
                         <div className="mb-8">
                             <h1 className="text-3xl font-bold text-gray-800 mb-2">My Shelf</h1>
                             <p className="text-gray-600">
-                                {pageInfo.total} book{pageInfo.total !== 1 ? 's' : ''} in your collection
+                                {books.length} book{books.length !== 1 ? 's' : ''} in your collection
                             </p>
                         </div>
 
@@ -186,7 +223,7 @@ function shelf() {
                                     setSearchTerm(tempSearch);
                                     fetchBooks();
                                 }} >
-                                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" type="button"/>
+                                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" type="button" />
                                     <input
                                         type="text"
                                         placeholder="Search books..."
@@ -260,61 +297,71 @@ function shelf() {
                             </div>
                         ) : (
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                                {books.map((book) => (
-                                    <div
-                                        key={book._id}
-                                        onClick={() => handleBookClick(book._id, book.userId)}
-                                        className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 cursor-pointer border border-gray-200 hover:border-green-300"
-                                    >
-                                        {/* Book Icon */}
-                                        <div className="bg-green-100 w-16 h-20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                            <FaBook className="w-8 h-8 text-green-600" />
-                                        </div>
+                                {books.map((book, index) => (
 
-                                        {/* Book Info */}
-                                        <div className="text-center">
-                                            <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 min-h-[3rem]">
-                                                {book.title}
-                                            </h3>
-                                            <p className="text-gray-600 mb-3 text-sm">
-                                                by {book.author}
-                                            </p>
+                                    <div key={index} className="relative group border rounded-lg shadow hover:shadow-md">
+                                        {/* Delete button */}
+                                        <RiDeleteBin6Fill className=" text-gray-700 absolute top-2 right-2 text-2xl md:text-lg md:opacity-0 md:group-hover:opacity-100 md:transition" onClick={(e) => handleBookDelete(e, book._id)} />
 
-                                            {/* Progress Bar */}
-                                            <div className="mb-3">
-                                                <div className="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>Progress</span>
-                                                    <span>{book.progress}%</span>
-                                                </div>
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                                    <div
-                                                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(book.progress)}`}
-                                                        style={{ width: `${book.progress}%` }}
-                                                    ></div>
-                                                </div>
+                                        {/* Book tile */}
+                                        <div
+                                            key={book._id}
+                                            onClick={() => handleBookClick(book._id, book.userId)}
+                                            className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-6 cursor-pointer border border-gray-200 hover:border-green-300"
+                                        >
+                                            {/* Book Icon */}
+                                            <div className="bg-green-100 w-16 h-20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                                <FaBook className="w-8 h-8 text-green-600" />
                                             </div>
 
-                                            {/* Date Added */}
-                                            <p className="text-xs text-gray-500">
-                                                Added {formatDate(book.createdAt)}
-                                            </p>
-                                        </div>
+                                            {/* Book Info */}
+                                            <div className="text-center">
+                                                <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 min-h-[3rem]">
+                                                    {book.title}
+                                                </h3>
+                                                <p className="text-gray-600 mb-3 text-sm">
+                                                    by {book.author}
+                                                </p>
 
-                                        {/* Status Badge */}
-                                        <div className="mt-4 flex justify-center">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${book.progress === 0 ? 'bg-gray-100 text-gray-600' :
-                                                book.progress === 100 ? 'bg-green-100 text-green-600' :
-                                                    'bg-green-50 text-green-700'
-                                                }`}>
-                                                {book.progress === 0 ? 'Unread' :
-                                                    book.progress === 100 ? 'Completed' :
-                                                        'Reading'
-                                                }
-                                            </span>
+                                                {/* Progress Bar */}
+                                                <div className="mb-3">
+                                                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                                        <span>Progress</span>
+                                                        <span>{book.progress}%</span>
+                                                    </div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                                        <div
+                                                            className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(book.progress)}`}
+                                                            style={{ width: `${book.progress}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Date Added */}
+                                                <p className="text-xs text-gray-500">
+                                                    Added {formatDate(book.createdAt)}
+                                                </p>
+                                            </div>
+
+                                            {/* Status Badge */}
+                                            <div className="mt-4 flex justify-center">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${book.progress === 0 ? 'bg-gray-100 text-gray-600' :
+                                                    book.progress === 100 ? 'bg-green-100 text-green-600' :
+                                                        'bg-green-50 text-green-700'
+                                                    }`}>
+                                                    {book.progress === 0 ? 'Unread' :
+                                                        book.progress === 100 ? 'Completed' :
+                                                            'Reading'
+                                                    }
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
+
                                 ))}
                             </div>
+
+
                         )}
 
                         {/* Pagination */}
