@@ -16,19 +16,24 @@ function Shelf() {
     const { user, loading } = useAuth();
     const router = useRouter();
 
+    // Page variables
     const [books, setBooks] = useState([]);
     const [pageLoading, setPageLoading] = useState(true);
+    const [width, setWidth] = useState(0);
+    const maxVisiblePages = width < 768 ? 3 : 15;
+
+    // FIltering variables
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('createdAt');
     const [sortOrder, setSortOrder] = useState('desc');
     const [filterBy, setFilterBy] = useState('all');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageInfo, setPageInfo] = useState({});
-    const [width, setWidth] = useState(0);
-    const maxVisiblePages = width < 768 ? 3 : 15;
     const [tempSearch, setTempSearch] = useState("");
 
-    // Edit state
+    // Pagination variables
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageInfo, setPageInfo] = useState({});
+
+    // Editing variables
     const [editingBookId, setEditingBookId] = useState(null);
     const [editForm, setEditForm] = useState({
         title: '',
@@ -41,57 +46,6 @@ function Shelf() {
         if (!loading && !user)
             router.replace('/login');
     }, [user, loading, router]);
-
-    const fetchBooks = async () => {
-        try {
-            setPageLoading(true);
-
-            if (!user) return;
-
-            const token = await user.getIdToken();
-
-            const params = new URLSearchParams({
-                page: currentPage,
-                sort: sortBy,
-                order: sortOrder,
-                search: searchTerm,
-                status: filterBy
-            });
-
-            const res = await fetch(
-                `/api/books?${params.toString()}`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`,
-                    },
-                }
-            );
-
-            if (!res.ok) {
-                throw new Error("Failed to fetch books");
-            }
-
-            const data = await res.json();
-
-            const normalizedBooks = data.books.map(book => {
-                if (book.progress && book.progress.includes("/")) {
-                    const [currentPage, totalPages] = book.progress.split("/").map(Number);
-                    const percentage = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0;
-                    return { ...book, progress: percentage };
-                }
-                return { ...book, progress: 0 };
-            });
-
-            setBooks(normalizedBooks);
-            setPageInfo(data.info);
-        } catch (error) {
-            console.error("Error fetching books:", error);
-        } finally {
-            setPageLoading(false);
-        }
-    };
 
     useEffect(() => {
         if (user) fetchBooks();
@@ -141,6 +95,57 @@ function Shelf() {
         // Only navigate if not editing
         if (editingBookId !== bookId) {
             console.log(`${bookId} clicked by ${userId}`);
+        }
+    };
+
+    const fetchBooks = async () => {
+        try {
+            setPageLoading(true);
+
+            if (!user) return;
+
+            const token = await user.getIdToken();
+
+            const params = new URLSearchParams({
+                page: currentPage,
+                sort: sortBy,
+                order: sortOrder,
+                search: searchTerm,
+                status: filterBy
+            });
+
+            const res = await fetch(
+                `/api/books?${params.toString()}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch books");
+            }
+
+            const data = await res.json();
+
+            const normalizedBooks = data.books.map(book => {
+                if (book.progress && book.progress.includes("/")) {
+                    const [currentPage, totalPages] = book.progress.split("/").map(Number);
+                    const percentage = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0;
+                    return { ...book, progress: percentage };
+                }
+                return { ...book, progress: 0 };
+            });
+
+            setBooks(normalizedBooks);
+            setPageInfo(data.info);
+        } catch (error) {
+            console.error("Error fetching books:", error);
+        } finally {
+            setPageLoading(false);
         }
     };
 
@@ -219,36 +224,6 @@ function Shelf() {
         }
     };
 
-    const confirmDeletion = () => {
-        return new Promise((resolve) => {
-            toast.custom((t) => (
-                <div className="bg-white shadow-md p-4 rounded-2xl flex flex-col gap-2">
-                    <span className="text-gray-700">Are you sure you want to delete this book?</span>
-                    <div className="flex gap-2">
-                        <button
-                            className="px-3 py-1 bg-red-500 text-white rounded-2xl cursor-pointer"
-                            onClick={() => {
-                                toast.dismiss(t.id);
-                                resolve(true);
-                            }}
-                        >
-                            Yes
-                        </button>
-                        <button
-                            className="px-3 py-1 bg-gray-300 rounded-2xl text-gray-700 cursor-pointer"
-                            onClick={() => {
-                                toast.dismiss(t.id);
-                                resolve(false);
-                            }}
-                        >
-                            No
-                        </button>
-                    </div>
-                </div>
-            ));
-        });
-    };
-
     const handleBookDelete = async (e, id) => {
         e.preventDefault();
         e.stopPropagation();
@@ -283,6 +258,11 @@ function Shelf() {
         }
     };
 
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setSearchTerm(tempSearch);
+    }
+
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -296,6 +276,37 @@ function Shelf() {
         if (progress === 100) return 'bg-red-600';
         return 'bg-green-500';
     };
+
+    const confirmDeletion = () => {
+        return new Promise((resolve) => {
+            toast.custom((t) => (
+                <div className="bg-white shadow-md p-4 rounded-2xl flex flex-col gap-2">
+                    <span className="text-gray-700">Are you sure you want to delete this book?</span>
+                    <div className="flex gap-2">
+                        <button
+                            className="px-3 py-1 bg-red-500 text-white rounded-2xl cursor-pointer"
+                            onClick={() => {
+                                toast.dismiss(t.id);
+                                resolve(true);
+                            }}
+                        >
+                            Yes
+                        </button>
+                        <button
+                            className="px-3 py-1 bg-gray-300 rounded-2xl text-gray-700 cursor-pointer"
+                            onClick={() => {
+                                toast.dismiss(t.id);
+                                resolve(false);
+                            }}
+                        >
+                            No
+                        </button>
+                    </div>
+                </div>
+            ));
+        });
+    };
+
 
     if (loading || pageLoading)
         return <Skeleton page='shelf' />;
@@ -318,11 +329,7 @@ function Shelf() {
                         <div className="grid md:grid-cols-4 gap-4">
                             {/* Search */}
                             <div className="relative">
-                                <div onSubmit={(e) => {
-                                    e.preventDefault();
-                                    setSearchTerm(tempSearch);
-                                    fetchBooks();
-                                }}>
+                                <form onSubmit={handleSearch}>
                                     <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                                     <input
                                         type="text"
@@ -331,7 +338,7 @@ function Shelf() {
                                         onChange={(e) => setTempSearch(e.target.value)}
                                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-gray-600"
                                     />
-                                </div>
+                                </form>
                             </div>
 
                             {/* Sort */}
@@ -443,7 +450,7 @@ function Shelf() {
                                                         placeholder="Author name"
                                                     />
 
-                                                    {/* Progress Bar (read-only) */}
+                                                    {/* Progress Bar */}
                                                     <div className="mb-3">
                                                         <div className="flex justify-between text-xs text-gray-500 mb-1">
                                                             <span>Progress</span>
@@ -457,12 +464,12 @@ function Shelf() {
                                                         </div>
                                                     </div>
 
-                                                    {/* Date Added (read-only) */}
+                                                    {/* Date Added  */}
                                                     <p className="text-xs text-gray-500">
                                                         Added {formatDate(book.createdAt)}
                                                     </p>
 
-                                                    {/* Action Buttons */}
+                                                    {/* Save/Cancel Buttons */}
                                                     <div className="flex gap-2 mt-4">
                                                         <button
                                                             onClick={handleUpdateBook}
