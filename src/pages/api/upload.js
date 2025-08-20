@@ -36,7 +36,9 @@ export default async function handler(req, res) {
             });
         });
 
-        const book = files.book;
+        const book = files.file;
+        console.log("book: ",book);
+        console.log("fields: ",fields);
 
         if (!book)
             return res.status(400).json({ error: "No file uploaded" });
