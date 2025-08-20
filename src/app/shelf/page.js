@@ -147,9 +147,40 @@ function shelf() {
         console.log(`${bookId} clicked by ${userId}`);
     };
 
+    const confirmDeletion = () => {
+        return new Promise((resolve) => {
+            toast.custom((t) => (
+                <div className="bg-white shadow-md p-4 rounded-2xl flex flex-col gap-2 ">
+                    <span className="text-gray-700">Are you sure you want to delete this book?</span>
+                    <div className="flex gap-2">
+                        <button
+                            className="px-3 py-1 bg-red-500 text-white rounded-2xl cursor-pointer"
+                            onClick={() => {
+                                toast.dismiss(t.id);
+                                resolve(true);
+                            }}
+                        >
+                            Yes
+                        </button>
+                        <button
+                            className="px-3 py-1 bg-gray-300 rounded-2xl text-gray-700 cursor-pointer"
+                            onClick={() => {
+                                toast.dismiss(t.id);
+                                resolve(false);
+                            }}
+                        >
+                            No
+                        </button>
+                    </div>
+                </div>
+            ));
+        });
+    };
+
     const handleBookDelete = async (e, id) => {
         e.preventDefault();
-        const confirmed = window.confirm("Are you sure you want to delete this book?");
+
+        const confirmed = await confirmDeletion();
         if (!confirmed) return;
 
         const previousBooks = [...books];
