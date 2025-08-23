@@ -3,7 +3,8 @@ import fs from "fs";
 import { connectDB } from "@/lib/mongodb";
 import Book from "@/models/book";
 import { admin } from '@/lib/firebaseadmin';
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { r2 } from "@/lib/r2";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 
@@ -13,14 +14,14 @@ export const config = {
     }
 }
 
-const r2 = new S3Client({
-    region: "auto",
-    endpoint: `https://${process.env.NEXT_PUBLIC_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-        accessKeyId: process.env.NEXT_PUBLIC_R2_ACCESS_KEY,
-        secretAccessKey: process.env.NEXT_PUBLIC_R2_SECRET_ACCESS_KEY
-    }
-});
+// const r2 = new S3Client({
+//     region: "auto",
+//     endpoint: `https://${process.env.NEXT_PUBLIC_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+//     credentials: {
+//         accessKeyId: process.env.NEXT_PUBLIC_R2_ACCESS_KEY,
+//         secretAccessKey: process.env.NEXT_PUBLIC_R2_SECRET_ACCESS_KEY
+//     }
+// });
 
 export default async function handler(req, res) {
 
