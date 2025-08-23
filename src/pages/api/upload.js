@@ -89,41 +89,28 @@ export default async function handler(req, res) {
         };
 
         // console.log("uploadParams: ", uploadParams);
-
-        try {
-            await r2.send(new PutObjectCommand(uploadParams));
-        } catch (error) {
-            console.error("Error 1: ", error);
-            return res.status(500).json({ error: "internal server error" });
-        }
+        await r2.send(new PutObjectCommand(uploadParams));
 
         dbBook.fileUrl = objectKey;
         await dbBook.save();
 
-        try {
-            const signedUrl = await getSignedUrl(
-                r2,
-                new GetObjectCommand({
-                    Bucket: process.env.NEXT_PUBLIC_R2_BUCKET_NAME,
-                    Key: objectKey,
-                }),
-                { expiresIn: 900 } // 15 minutes
-            );
+        const signedUrl = await getSignedUrl(
+            r2,
+            new GetObjectCommand({
+                Bucket: process.env.NEXT_PUBLIC_R2_BUCKET_NAME,
+                Key: objectKey,
+            }),
+            { expiresIn: 900 } // 15 minutes
+        );
 
-            res.status(200).json({
-                message: "Book uploaded successfully",
-                bookId: dbBook._id,
-                user: dbBook.userId,
-                time: dbBook.uploadedAt,
-                // signedUrl: "signedUrl"
-                signedUrl: signedUrl
-            });
-        } catch (error) {
-            console.error("Error 2: ", error);
-            return res.status(500).json({ error: "internal server error" });
-        }
-
-
+        res.status(200).json({
+            message: "Book uploaded successfully",
+            bookId: dbBook._id,
+            user: dbBook.userId,
+            time: dbBook.uploadedAt,
+            // signedUrl: "signedUrl"
+            signedUrl: signedUrl
+        });
 
     } catch (error) {
         if (error.code === "auth/id-token-expired") {
