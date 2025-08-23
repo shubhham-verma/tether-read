@@ -71,7 +71,7 @@ export default async function handler(req, res) {
             title: Array.isArray(fields.title) ? fields.title[0] : fields.title,
             author: Array.isArray(fields.author) ? fields.author[0] : fields.author,
             userId: uid,
-            fileUrl: "new dummy",
+            objectKey: "dummyKey",
             progress: 0,
             uploadedAt: new Date()
         });
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
         // console.log("uploadParams: ", uploadParams);
         await r2.send(new PutObjectCommand(uploadParams));
 
-        dbBook.fileUrl = objectKey;
+        dbBook.objectKey = objectKey;
         await dbBook.save();
 
         const signedUrl = await getSignedUrl(

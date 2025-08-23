@@ -82,7 +82,7 @@ export default async function handler(req, res) {
                 limit: limitNum,
                 total,
                 totalPages: Math.ceil(total / limitNum),
-                hasNext: pageNum * limitNum < total,
+                hasNext: pageNum * limitNum <= total,
                 hasPrev: pageNum > 1,
                 sort: { by: sortField, order: sortOrder === 1 ? "asc" : "desc" }
             }
