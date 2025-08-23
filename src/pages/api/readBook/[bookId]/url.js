@@ -25,8 +25,6 @@ export default async function handler(req, res) {
 
         const { bookId } = req.query;
         const book = await Book.findById(bookId);
-        console.log("Db userid: ", book.userId.toString());
-        console.log("uid: ", uid);
 
         if (!book)
             return res.status(401).json({ error: "Book not found" });
