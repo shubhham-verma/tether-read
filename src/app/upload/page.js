@@ -44,12 +44,7 @@ export default function UploadPage() {
   // Parse EPUB metadata using JSZip (since EPUB is essentially a ZIP file)
   const parseEpubMetadata = async (file) => {
     try {
-      // Create a simple EPUB parser using JSZip simulation
-      // Note: In a real implementation, you'd use a library like epub-parser or jszip
-      const arrayBuffer = await file.arrayBuffer();
 
-      // Simulate metadata extraction (replace with actual EPUB parsing)
-      // For demo purposes, using filename-based extraction
       const filename = file.name.replace('.epub', '');
       const parts = filename.split('-');
 

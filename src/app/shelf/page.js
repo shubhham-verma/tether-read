@@ -378,7 +378,7 @@ function Shelf() {
                             </div>
 
                             {/* Add Book Button */}
-                            <Link href="/upload" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center gap-2">
+                            <Link href="/upload" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center gap-2" >
                                 <FaPlus className="w-4 h-4" />
                                 Add Book
                             </Link>
