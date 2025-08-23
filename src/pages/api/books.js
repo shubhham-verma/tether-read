@@ -2,6 +2,8 @@ import { connectDB } from "@/lib/mongodb";
 import Book from "@/models/book";
 import { admin } from '@/lib/firebaseadmin';
 import mongoose from "mongoose";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { r2 } from "@/lib/r2";
 
 const ALLOWED_SORT_FIELDS = {
     createdAt: "createdAt",
@@ -120,12 +122,25 @@ export default async function handler(req, res) {
             }
 
             else if (req.method === "DELETE") {
-                const deletedBook = await Book.findOneAndDelete({ _id: bookId, userId: uid });
 
-                if (!deletedBook) {
+                const book = await Book.findOne({ _id: bookId, userId: uid });
+                if (!book) {
                     return res.status(404).json({ error: "Book not found or not owned by user" });
                 }
 
+                try {
+                    const deleteCommand = new DeleteObjectCommand({
+                        Bucket: process.env.NEXT_PUBLIC_R2_BUCKET_NAME,
+                        Key: book.objectKey,
+                    });
+
+                    await r2.send(deleteCommand);
+                } catch (err) {
+                    console.error("Error deleting from R2:", err);
+                    return res.status(500).json({ error: "Failed to delete book from storage" });
+                }
+
+                await Book.deleteOne({ _id: bookId, userId: uid });
                 return res.status(200).json({ message: "Book deleted successfully" });
             }
             else
