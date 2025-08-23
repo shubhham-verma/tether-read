@@ -3,12 +3,17 @@
 import ePub from "epubjs";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import Skeleton from "@/components/Skeleton";
 import { FaArrowRight, FaArrowLeft, FaListUl } from "react-icons/fa6";
 
-function ReaderPage({ params }) {
+export default function ReaderPage() {
+
+  const { bookid } = useParams();
+  // const bookId = params.bookid;
+
+
   const { user, loading } = useAuth();
   const router = useRouter();
   const [toc, setToc] = useState([]);
@@ -17,6 +22,7 @@ function ReaderPage({ params }) {
   const [currentPage, setCurrentPage] = useState(-1);
   const [totalPages, setTotalPages] = useState(-1);
   const [activeChapterHref, setActiveChapterHref] = useState(null);
+  const [signedUrl, setSignedUrl] = useState("");
 
 
   const viewerRef = useRef(null);
@@ -32,33 +38,72 @@ function ReaderPage({ params }) {
     ]);
   };
 
+  useEffect(() => {
+    if (!bookid || !user) return;
+
+    const fetchBook = async () => {
+      const token = await user.getIdToken();
+
+      try {
+        const result = await fetch(`/api/readBook/${bookid}/url`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          }
+        });
+
+        const data = await result.json();
+        setSignedUrl(data.url);
+        // console.log("Fetched URL:", data.url);  
+      } catch (error) {
+        console.error("Failed to generate url", error);
+      }
+    };
+
+    fetchBook();
+  }, [bookid, user]);
+
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/login");
-    } else if (viewerRef.current) {
-      const book = ePub("/sample2.epub");
+      return;
+    }
+
+    if (viewerRef.current && signedUrl) {
+      const book = ePub(signedUrl);
       const rendition = book.renderTo(viewerRef.current, {
         width: "100%",
         height: "100%",
-        spread: "both"
+        spread: "both",
       });
 
       renditionRef.current = rendition;
       bookRef.current = book;
 
+      const handleKeyDown = (e) => {
+        if (!renditionRef.current) return;
+        if (e.key === "ArrowRight") renditionRef.current.next();
+        if (e.key === "ArrowLeft") renditionRef.current.prev();
+      };
+
+      // Setup locations + ToC
       book.ready.then(() => {
         return book.locations.generate(5000).then(() => {
-          const currentCfi = rendition.currentLocation().start.cfi;
           setTotalPages(book.locations.length());
-          setCurrentPage(book.locations.locationFromCfi(currentCfi));
 
+          const savedCfi = localStorage.getItem("lastReadCfi");
+          if (savedCfi) {
+            rendition.display(savedCfi);
+          } else {
+            rendition.display();
+          }
         });
       });
 
       book.loaded.navigation.then((nav) => {
         const flat = flattenTOC(nav.toc);
-        tocRef.current = flat;      // keep ref updated
+        tocRef.current = flat;
         setToc(flat);
       });
 
@@ -69,51 +114,31 @@ function ReaderPage({ params }) {
 
         localStorage.setItem("lastReadCfi", location.start.cfi);
 
-
         const currentHref = location.start.href;
-        const activeChapter = tocRef.current.find(item => currentHref.includes(item.href));
+        const activeChapter = tocRef.current.find((item) =>
+          currentHref.includes(item.href)
+        );
         if (activeChapter) {
           setActiveChapterHref(activeChapter.href);
         }
       });
 
-      // rendition.display();
-
-      const savedCfi = localStorage.getItem("lastReadCfi");
-      if (savedCfi) {
-        rendition.display(savedCfi);
-      } else {
-        rendition.display();
-      }
-
-      rendition.on("rendered", (section) => {
-        const contents = rendition.getContents();
-        contents.forEach((content) => {
+      rendition.on("rendered", () => {
+        rendition.getContents().forEach((content) => {
           content.document.addEventListener("keydown", handleKeyDown);
         });
       });
 
-
-
-      const handleKeyDown = (e) => {
-        if (!renditionRef.current) return;
-        if (e.key === "ArrowRight") {
-          renditionRef.current?.next();
-        }
-        if (e.key === "ArrowLeft") {
-          renditionRef.current?.prev();
-        }
-      }
-
       document.addEventListener("keydown", handleKeyDown);
-
 
       return () => {
         rendition.destroy();
         document.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [user, loading, router]);
+  }, [signedUrl, user, loading, router]);
+
+
 
 
   if (loading)
@@ -127,7 +152,8 @@ function ReaderPage({ params }) {
     <div className="bg-yellow-100">
       <>
         {/* main reader component */}
-        <div className="w-full lg:w-13/14 lg:mx-auto h-[85vh] bg-yellow-100" ref={viewerRef}></div>
+        {/* <div className="w-full lg:w-13/14 lg:mx-auto h-[85vh] bg-yellow-100" ref={viewerRef}></div> */}
+        <div ref={viewerRef} className="w-full h-[85vh] bg-yellow-100"></div>
 
         {/* opacity overlay */}
         <div
@@ -235,5 +261,3 @@ function ReaderPage({ params }) {
 
   );
 }
-
-export default ReaderPage;

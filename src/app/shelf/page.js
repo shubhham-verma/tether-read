@@ -94,7 +94,8 @@ function Shelf() {
     const handleBookClick = (bookId, userId) => {
         // Only navigate if not editing
         if (editingBookId !== bookId) {
-            console.log(`${bookId} clicked by ${userId}`);
+            // console.log(`${bookId} clicked by ${userId}`);
+            router.push(`/reader/${bookId}`);
         }
     };
 
@@ -378,10 +379,10 @@ function Shelf() {
                             </div>
 
                             {/* Add Book Button */}
-                            <Link href="/upload" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center gap-2" >
+                            <a href="/upload" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center gap-2" >
                                 <FaPlus className="w-4 h-4" />
                                 Add Book
-                            </Link>
+                            </a>
                         </div>
                     </div>
 
@@ -479,7 +480,7 @@ function Shelf() {
                                                                 : 'bg-green-600 hover:bg-green-700'
                                                                 } text-white`}
                                                         >
-                                                            <FaCheck className="w-3 h-3" />
+                                                            <FaCheck className="w-3 h-3" disabled={isUpdating} />
                                                             {isUpdating ? 'Saving...' : 'Save'}
                                                         </button>
                                                         <button
