@@ -7,12 +7,11 @@ import { useParams, useRouter } from "next/navigation";
 
 import Skeleton from "@/components/Skeleton";
 import { FaArrowRight, FaArrowLeft, FaListUl } from "react-icons/fa6";
+import { Spinner } from "flowbite-react";
 
 export default function ReaderPage() {
 
   const { bookid } = useParams();
-  // const bookId = params.bookid;
-
 
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -214,9 +213,10 @@ export default function ReaderPage() {
               </div>}
 
             {(currentPage === -1 || totalPages === -1) &&
-              <div role="status" className="max-w-sm animate-pulse">
-                <div className="h-2.5 bg-gray-200 rounded-full dark:bg-green-600 w-14 my-4"></div>
-              </div>
+              // <div role="status" className="max-w-sm animate-pulse">
+              //   <div className="h-2.5 bg-gray-200 rounded-full dark:bg-green-600 w-14 my-4"></div>
+              // </div>
+              <Spinner color="success" aria-label="Success spinner example" />
             }
 
             {/* navigation buttons */}
