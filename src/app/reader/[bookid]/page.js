@@ -152,7 +152,7 @@ export default function ReaderPage() {
       <>
         {/* main reader component */}
         {/* <div className="w-full lg:w-13/14 lg:mx-auto h-[85vh] bg-yellow-100" ref={viewerRef}></div> */}
-        <div ref={viewerRef} className="w-full h-[85vh] bg-yellow-100"></div>
+        <div ref={viewerRef} className="w-full lg:w-13/14 h-[85vh] bg-yellow-100"></div>
 
         {/* opacity overlay */}
         <div
@@ -213,9 +213,6 @@ export default function ReaderPage() {
               </div>}
 
             {(currentPage === -1 || totalPages === -1) &&
-              // <div role="status" className="max-w-sm animate-pulse">
-              //   <div className="h-2.5 bg-gray-200 rounded-full dark:bg-green-600 w-14 my-4"></div>
-              // </div>
               <Spinner color="success" aria-label="Success spinner example" />
             }
 
