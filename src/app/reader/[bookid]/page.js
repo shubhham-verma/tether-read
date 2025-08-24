@@ -151,7 +151,6 @@ export default function ReaderPage() {
     <div className="bg-yellow-100">
       <>
         {/* main reader component */}
-        {/* <div className="w-full lg:w-13/14 lg:mx-auto h-[85vh] bg-yellow-100" ref={viewerRef}></div> */}
         <div ref={viewerRef} className="w-full lg:w-13/14 h-[85vh] bg-yellow-100"></div>
 
         {/* opacity overlay */}

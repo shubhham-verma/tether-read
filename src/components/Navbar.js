@@ -57,16 +57,17 @@ export default function Navigation() {
                                             <a href="/shelf" className={`block py-2 px-3 rounded-sm ${pathname === "/shelf" ? "text-green-700 dark:text-green-500 font-bold" : "text-gray-900 dark:text-white"}
                                              hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}> Shelf</a>
                                         </li>
-                                        <li>
+                                        <li class="md:relative md:after:content-[''] md:after:absolute md:after:w-[1px] md:after:h-6 md:after:bg-gray-400 md:after:right-[-16px] md:after:top-1/2 md:after:-translate-y-1/2">
                                             <a href="/upload" className={`block py-2 px-3 rounded-sm ${pathname === "/upload" ? "text-green-700 dark:text-green-500 font-bold" : "text-gray-900 dark:text-white"}
                                              hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}> Upload</a>
                                         </li>
-                                        <li>
+                                        {/* <li>
                                             <a href="/reader/123" className={`block py-2 px-3 rounded-sm ${pathname === "/" ? "text-green-700 dark:text-green-500 font-bold" : "text-gray-900 dark:text-white"}
                                              hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent`}> Read</a>
-                                        </li>
+                                        </li> */}
+
                                         <li>
-                                            <a href="#" className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" onClick={handleSignout}>Sign Out</a>
+                                            <a href="#" className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-green-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" onClick={handleSignout}>Sign Out</a>
                                         </li>
                                     </>
                                     :
