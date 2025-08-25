@@ -63,14 +63,12 @@ export default async function handler(req, res) {
 
             if (statusFilter !== "all") {
                 books = books.filter(book => {
-                    if (!book.progress) return false;
+                    const percentage = book.percentage;
+                    if (isNaN(percentage)) return false;
 
-                    const [current, total] = book.progress.split("/").map(n => parseInt(n, 10));
-                    if (isNaN(current) || isNaN(total)) return false;
-
-                    if (statusFilter === "unread") return current === 0;
-                    if (statusFilter === "reading") return current > 0 && current < total;
-                    if (statusFilter === "completed") return current === total;
+                    if (statusFilter === "unread") return percentage === 0;
+                    if (statusFilter === "reading") return (percentage > 0 && percentage < 100);
+                    if (statusFilter === "completed") return percentage === 100;
 
                     return true;
                 });
@@ -109,7 +107,6 @@ export default async function handler(req, res) {
                     {
                         ...(title && { title }),
                         ...(author && { author }),
-                        ...(progress && { progress }),
                         updatedAt: new Date()
                     },
                     { new: true }
