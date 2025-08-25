@@ -64,7 +64,8 @@ export default async function handler(req, res) {
             author: Array.isArray(fields.author) ? fields.author[0] : fields.author,
             userId: uid,
             objectKey: "dummyKey",
-            progress: 0,
+            cif: "",
+            percentage: 0,
             uploadedAt: new Date()
         });
 
