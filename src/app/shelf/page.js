@@ -94,7 +94,6 @@ function Shelf() {
     const handleBookClick = (bookId, userId) => {
         // Only navigate if not editing
         if (editingBookId !== bookId) {
-            // console.log(`${bookId} clicked by ${userId}`);
             router.push(`/reader/${bookId}`);
         }
     };
@@ -132,16 +131,7 @@ function Shelf() {
 
             const data = await res.json();
 
-            const normalizedBooks = data.books.map(book => {
-                if (book.progress && book.progress.includes("/")) {
-                    const [currentPage, totalPages] = book.progress.split("/").map(Number);
-                    const percentage = totalPages > 0 ? Math.round((currentPage / totalPages) * 100) : 0;
-                    return { ...book, progress: percentage };
-                }
-                return { ...book, progress: 0 };
-            });
-
-            setBooks(normalizedBooks);
+            setBooks(data.books);
             setPageInfo(data.info);
         } catch (error) {
             console.error("Error fetching books:", error);
@@ -198,7 +188,7 @@ function Shelf() {
             });
 
             if (res.ok) {
-                const updatedBook = await res.json();
+                await res.json();
 
                 // Update the book in the local state
                 setBooks(prevBooks =>
@@ -515,12 +505,12 @@ function Shelf() {
                                                     <div className="mb-3">
                                                         <div className="flex justify-between text-xs text-gray-500 mb-1">
                                                             <span>Progress</span>
-                                                            <span>{book.progress}%</span>
+                                                            <span>{book.percentage}%</span>
                                                         </div>
                                                         <div className="w-full bg-gray-200 rounded-full h-2">
                                                             <div
-                                                                className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(book.progress)}`}
-                                                                style={{ width: `${book.progress}%` }}
+                                                                className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(book.percentage)}`}
+                                                                style={{ width: `${book.percentage}%` }}
                                                             ></div>
                                                         </div>
                                                     </div>
@@ -537,8 +527,8 @@ function Shelf() {
                                                         book.progress === 100 ? 'bg-green-100 text-green-600' :
                                                             'bg-green-50 text-green-700'
                                                         }`}>
-                                                        {book.progress === 0 ? 'Unread' :
-                                                            book.progress === 100 ? 'Completed' :
+                                                        {book.percentage === 0 ? 'Unread' :
+                                                            book.percentage === 100 ? 'Completed' :
                                                                 'Reading'
                                                         }
                                                     </span>
