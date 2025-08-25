@@ -244,142 +244,143 @@ export default function ReaderPage() {
   }, [fontSize]);
 
   // Main EPUB initialization effect
+  const initializedRef = useRef(false);
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/login");
       return;
     }
+    if (!viewerRef.current || !signedUrl) return;
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
-    if (viewerRef.current && signedUrl) {
-      setIsLoading(true);
-      setError(null);
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const book = ePub(signedUrl);
-        const rendition = book.renderTo(viewerRef.current, {
-          width: "100%",
-          height: "100%",
-          spread: "both",
-        });
+    let book, rendition;
 
-        renditionRef.current = rendition;
-        bookRef.current = book;
+    try {
+      book = ePub(signedUrl);
+      rendition = book.renderTo(viewerRef.current, {
+        width: "100%",
+        height: "100%",
+        spread: "both",
+      });
 
-        // Apply font size
-        rendition.themes.fontSize(`${fontSize}%`);
+      renditionRef.current = rendition;
+      bookRef.current = book;
 
-        // Setup locations + load saved position
-        book.ready.then(async () => {
+      rendition.themes.fontSize(`${fontSize}%`);
+
+      book.ready.then(async () => {
+        try {
+          await book.locations.generate(5000);
+          setTotalPages(book.locations.length());
+
+          // fetch saved CFI
+          let savedCfi = null;
           try {
-            await book.locations.generate(5000);
-            setTotalPages(book.locations.length());
+            const token = await user.getIdToken();
+            const response = await fetch(`/api/book/${bookid}/progress`, {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (response.ok) {
+              const progressData = await response.json();
 
-            // Try to load saved progress from server first
-            let savedCfi = null;
-            try {
-              const token = await user.getIdToken();
-              const response = await fetch(`/api/book/${bookid}/progress`, {
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                }
-              });
-              if (response.ok) {
-                const progressData = await response.json();
-                savedCfi = progressData.currentCfi;
-              }
-            } catch (error) {
-              console.error('Failed to load progress from server:', error);
+              savedCfi = progressData.currentCfi || progressData.cfi || null;
             }
-
-            // Fallback to localStorage
-            if (!savedCfi) {
-              savedCfi = localStorage.getItem(`book_${bookid}_cfi`);
-            }
-
-            if (savedCfi) {
-              await rendition.display(savedCfi);
-            } else {
-              await rendition.display();
-            }
-
-            setIsLoading(false);
-          } catch (error) {
-            console.error('Failed to setup book locations:', error);
-            setError('Failed to initialize book. Please try refreshing.');
-            setIsLoading(false);
+          } catch (err) {
+            console.error("Failed to load progress from server:", err);
           }
-        }).catch(error => {
-          console.error('Book ready failed:', error);
-          setError('Failed to load book content.');
-          setIsLoading(false);
-        });
+          if (!savedCfi) {
+            savedCfi = localStorage.getItem(`book_${bookid}_cfi`);
+          }
 
-        // Load TOC (store raw for lazy flattening)
-        book.loaded.navigation.then((nav) => {
+          // restore location
+          try {
+            await rendition.display(savedCfi || undefined);
+          } catch {
+            await rendition.display(); 
+          }
+
+          setIsLoading(false);
+        } catch (err) {
+          console.error("Failed to setup book locations:", err);
+          setError("Failed to initialize book. Please try refreshing.");
+          setIsLoading(false);
+        }
+      }).catch(err => {
+        console.error("Book ready failed:", err);
+        setError("Failed to load book content.");
+        setIsLoading(false);
+      });
+
+      // Load TOC
+      book.loaded.navigation
+        .then((nav) => {
           setRawToc(nav.toc);
           tocRef.current = flattenTOC(nav.toc);
-        }).catch(error => {
-          console.error('Failed to load TOC:', error);
-        });
+        })
+        .catch((error) => console.error("Failed to load TOC:", error));
 
-        // Handle page relocations
-        rendition.on("relocated", (location) => {
-          try {
-            const percentage = book.locations.percentageFromCfi(location.start.cfi);
-            const progressPercent = Number((percentage * 100).toFixed(2));
-            const pageNum = book.locations.locationFromCfi(location.start.cfi);
+      // Handle page relocations
+      rendition.on("relocated", (location) => {
+        try {
+          const percentage = book.locations.percentageFromCfi(location.start.cfi);
+          const progressPercent = Number((percentage * 100).toFixed(2));
+          const pageNum = book.locations.locationFromCfi(location.start.cfi);
 
-            setProgress(progressPercent);
-            setCurrentPage(pageNum);
+          setProgress(progressPercent);
+          setCurrentPage(pageNum);
 
-            // Debounced save to server/localStorage
-            debouncedProgressSave(location.start.cfi, pageNum, progressPercent);
+          // your debounced save signature expects (cfi, progressPercent)
+          debouncedProgressSave(location.start.cfi, progressPercent);
 
-            // Update active chapter
-            const currentHref = location.start.href;
-            const activeChapter = tocRef.current.find((item) =>
-              currentHref.includes(item.href)
-            );
-            if (activeChapter) {
-              setActiveChapterHref(activeChapter.href);
-              setCurrentChapterName(activeChapter.label.replace(/^— /, ''));
-            }
-          } catch (error) {
-            console.error('Error handling relocation:', error);
+          // Update active chapter
+          const currentHref = location.start.href;
+          const activeChapter = tocRef.current.find((item) =>
+            currentHref.includes(item.href)
+          );
+          if (activeChapter) {
+            setActiveChapterHref(activeChapter.href);
+            setCurrentChapterName(activeChapter.label.replace(/^— /, ""));
           }
+        } catch (error) {
+          console.error("Error handling relocation:", error);
+        }
+      });
+
+      // Add touch/click listeners
+      rendition.on("rendered", () => {
+        rendition.getContents().forEach((content) => {
+          const doc = content.document;
+          doc.addEventListener("keydown", handleKeyDown);
+          doc.addEventListener("touchstart", handleTouchStart, { passive: true });
+          doc.addEventListener("touchend", handleTouchEnd, { passive: true });
         });
+      });
 
-        // Add touch and click listeners
-        rendition.on("rendered", () => {
-          rendition.getContents().forEach((content) => {
-            const doc = content.document;
-            doc.addEventListener("keydown", handleKeyDown);
-            doc.addEventListener("touchstart", handleTouchStart, { passive: true });
-            doc.addEventListener("touchend", handleTouchEnd, { passive: true });
-          });
-        });
-
-        // Global event listeners
-        document.addEventListener("keydown", handleKeyDown);
-
-        return () => {
-          try {
-            if (rendition) {
-              rendition.destroy();
-            }
-            document.removeEventListener("keydown", handleKeyDown);
-          } catch (error) {
-            console.error('Error during cleanup:', error);
-          }
-        };
-
-      } catch (error) {
-        console.error('Failed to initialize EPUB:', error);
-        setError('Failed to load book. Please check if the file is a valid EPUB.');
-        setIsLoading(false);
-      }
+      document.addEventListener("keydown", handleKeyDown);
+    } catch (error) {
+      console.error("Failed to initialize EPUB:", error);
+      setError("Failed to load book. Please check if the file is a valid EPUB.");
+      setIsLoading(false);
     }
-  }, [signedUrl, user, loading, router, fontSize, bookid]);
+
+    // cleanup
+    return () => {
+      try {
+        document.removeEventListener("keydown", handleKeyDown);
+        if (rendition) rendition.destroy();
+        if (book) book.destroy && book.destroy();
+      } catch (err) {
+        console.error("Error during cleanup:", err);
+      }
+    };
+    // 🚫 fontSize removed; 🚫 router removed
+  }, [signedUrl, user, loading, bookid]);
 
   // Cleanup on unmount
   useEffect(() => {

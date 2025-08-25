@@ -36,8 +36,6 @@ export default async function handler(req, res) {
 
             if (!cfi)
                 return res.status(500).json({ error: "CFI cannot be empty" });
-            if (!percentage)
-                return res.status(500).json({ error: "Percentage cannot be empty" });
             if (isNaN(percentage))
                 return res.status(500).json({ error: "Percentage must be a number" });
 
