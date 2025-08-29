@@ -2,13 +2,19 @@
 
 **Tether Read** is a modern web application that helps you synchronize your reading progress across devices. Built with Next.js, Firebase, MongoDB, and Flowbite React, it allows users to upload EPUB books, track reading progress, and enjoy a seamless reading experience with cloud sync.
 
-![Landing Page](/frontend-tether-read/public/projectImages/landingPage.png "Landing Page")
+---
 
-![Shelf Page](/frontend-tether-read/public/projectImages/shelfPage.png "Shelf Page")
+## Gallery
 
-![Reader Page](/frontend-tether-read/public/projectImages/readerPage.png "Reader Page")
+![Landing Page](/public/projectImages/landingPage.png "Landing Page")
 
-![Upload Page](/frontend-tether-read/public/projectImages/uploadPage.png "Upload Page")
+![Shelf Page](/public/projectImages/shelfPage.png "Shelf Page")
+
+![Reader Page](/public/projectImages/readerPage.png "Reader Page")
+
+![Shelf Page Mobile](/public/projectImages/shelfPageMobile.png "Shelf Page Mobile")
+
+![Reader Page Mobile](/public/projectImages/readerPageMobile.png "Reader Page Mobile")
 ---
 
 ## Features
