@@ -16,7 +16,7 @@ export default async function handler(req, res) {
             return res.status(401).json({ error: "Unauthorized: Please provide a valid token" });
         }
 
-        if (req.method === "GET") {
+        if (req.method === "POST") {
 
             const { books } = req.body;
             const prompt = `
