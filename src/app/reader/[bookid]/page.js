@@ -504,7 +504,7 @@ export default function ReaderPage() {
 
       {/* TOC Drawer */}
       <div
-        className={`fixed bottom-0 w-full top-92 md:right-0 md:top-93 md:w-fit max-h-[50vh] bg-green-800 shadow-xl transform transition-transform duration-300 ease-in-out z-10 overflow-y-auto ${showTOC ? "translate-y-0" : "translate-y-full"
+        className={`fixed bottom-0 w-full top-92 md:right-0  md:w-fit max-h-[100vh] bg-green-800 shadow-xl transform transition-transform duration-300 ease-in-out z-10 overflow-y-auto ${showTOC ? "translate-y-0" : "translate-y-full"
           }`}
       >
         <div className="p-4 border-b border-green-400 flex justify-between items-center">
