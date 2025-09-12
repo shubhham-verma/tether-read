@@ -12,6 +12,7 @@ import { RiDeleteBin6Fill } from "react-icons/ri";
 import toast from 'react-hot-toast';
 import Skeleton from '@/components/Skeleton';
 import { Spinner } from "flowbite-react";
+import RecommendationsModal from '@/components/Modal';
 
 function Shelf() {
     const { user, loading } = useAuth();
@@ -23,7 +24,11 @@ function Shelf() {
     const [width, setWidth] = useState(0);
     const maxVisiblePages = width < 768 ? 3 : 15;
     const [loadingBookId, setLoadingBookId] = useState(null);
+
+    // Ai Recommendation variables
     const [aiRecommendationLoading, setAiRecommendationLoading] = useState(false);
+    const [isRecommendationsModalOpen, setIsRecommendationsModalOpen] = useState(false);
+    const [aiRecommendations, setAiRecommendations] = useState([]);
 
     // FIltering variables
     const [searchTerm, setSearchTerm] = useState('');
@@ -262,6 +267,8 @@ function Shelf() {
         // e.preventDefault();
         try {
             setAiRecommendationLoading(true);
+            
+
 
             if (!user) return;
 
@@ -284,8 +291,10 @@ function Shelf() {
             }
 
             const data = await res.json();
-
             console.log(data.recommendations);
+            setAiRecommendations(data.recommendations);
+            setIsRecommendationsModalOpen(true);
+
         } catch (error) {
             console.error("Error fetching books:", error);
         } finally {
@@ -385,6 +394,12 @@ function Shelf() {
                             </button>
                         </div>
                     </div>
+
+                    <RecommendationsModal
+                        isOpen={isRecommendationsModalOpen}
+                        onClose={() => setIsRecommendationsModalOpen(false)}
+                        recommendations={aiRecommendations}
+                    />
 
                     {/* Search, Sort, Filter Controls */}
                     <div className="bg-white rounded-lg shadow-sm p-6 mb-8">

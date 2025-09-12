@@ -23,7 +23,7 @@ export default async function handler(req, res) {
                 Recommend 5 books based on this list: ${JSON.stringify(books)}.
                 Return ONLY JSON in this format:
                 [
-                { "title": "Book Title", "author": "Author Name", "goodreads_link": "https://..." }
+                { "title": "Book Title", "author": "Author Name" }
                 ]`;
 
             const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
