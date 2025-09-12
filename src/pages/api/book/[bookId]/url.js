@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
 
         const command = new GetObjectCommand({
-            Bucket: process.env.NEXT_PUBLIC_R2_BUCKET_NAME,
+            Bucket: process.env.R2_BUCKET_NAME,
             Key: book.objectKey,
         })
 

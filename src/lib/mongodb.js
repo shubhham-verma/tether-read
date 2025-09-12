@@ -7,7 +7,7 @@ export async function connectDB() {
         return;
 
     try {
-        const conn = await mongoose.connect(process.env.NEXT_PUBLIC_mongo_uri, {
+        const conn = await mongoose.connect(process.env.MONGO_URI, {
             dbName: 'tether_read',
             // useNewUrlParser: true,
             // useUnifiedTopology: true

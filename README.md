@@ -61,13 +61,13 @@ npm install
 Create a `.env` file in `frontend-tether-read`:
 
 ```env
-NEXT_PUBLIC_firebase_apiKey=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_API_KEY=your_NEXT_PUBLIC_FIREBASE_API_KEY
 NEXT_PUBLIC_firebase_authDomain=your_firebase_auth_domain
 NEXT_PUBLIC_firebase_projectId=your_firebase_project_id
 NEXT_PUBLIC_firebase_storageBucket=your_firebase_storage_bucket
-NEXT_PUBLIC_firebase_messagingSenderId=your_firebase_messaging_sender_id
-NEXT_PUBLIC_firebase_appId=your_firebase_app_id
-NEXT_PUBLIC_mongo_uri=your_mongodb_connection_string
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+NEXT_PUBLIC_FIREBASE_APP_ID=your_NEXT_PUBLIC_FIREBASE_APP_ID
+MONGO_URI=your_mongodb_connection_string
 ```
 
 > **Note:** Never commit your `.env` file with secrets to GitHub.

@@ -74,7 +74,7 @@ export default async function handler(req, res) {
 
         const fileStream = fs.createReadStream(book[0].filepath);
         const uploadParams = {
-            Bucket: process.env.NEXT_PUBLIC_R2_BUCKET_NAME,
+            Bucket: process.env.R2_BUCKET_NAME,
             Key: objectKey,
             Body: fileStream,
             ContentType: "application/epub+zip",
@@ -90,7 +90,7 @@ export default async function handler(req, res) {
         const signedUrl = await getSignedUrl(
             r2,
             new GetObjectCommand({
-                Bucket: process.env.NEXT_PUBLIC_R2_BUCKET_NAME,
+                Bucket: process.env.R2_BUCKET_NAME,
                 Key: objectKey,
             }),
             { expiresIn: 900 } // 15 minutes
