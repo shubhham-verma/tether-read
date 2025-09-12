@@ -66,7 +66,7 @@ export default async function handler(req, res) {
             // console.log(data.choices[0].message);
             let content = await data.choices[0]?.message?.content || "";
             content = content.replace(/```json/g, "").replace(/```/g, "").trim();
-            console.log(content);
+            // console.log(content);
 
             res.status(200).json({ recommendations: JSON.parse(content) });
             // res.status(200).json("ok");

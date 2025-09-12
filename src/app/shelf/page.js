@@ -23,6 +23,7 @@ function Shelf() {
     const [width, setWidth] = useState(0);
     const maxVisiblePages = width < 768 ? 3 : 15;
     const [loadingBookId, setLoadingBookId] = useState(null);
+    const [aiRecommendationLoading, setAiRecommendationLoading] = useState(false);
 
     // FIltering variables
     const [searchTerm, setSearchTerm] = useState('');
@@ -255,6 +256,41 @@ function Shelf() {
     const handleSearch = (e) => {
         e.preventDefault();
         setSearchTerm(tempSearch);
+    };
+
+    const handleAiRecommends = async (e) => {
+        // e.preventDefault();
+        try {
+            setAiRecommendationLoading(true);
+
+            if (!user) return;
+
+            const token = await user.getIdToken();
+
+            const res = await fetch(
+                `/api/recommendation`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ books }),
+                }
+            );
+
+            if (!res.ok) {
+                throw new Error("Failed to fetch books");
+            }
+
+            const data = await res.json();
+
+            console.log(data.recommendations);
+        } catch (error) {
+            console.error("Error fetching books:", error);
+        } finally {
+            setAiRecommendationLoading(false);
+        }
     }
 
     const formatDate = (dateString) => {
@@ -311,11 +347,43 @@ function Shelf() {
             <div className="min-h-screen bg-gray-200">
                 <div className="max-w-7xl mx-auto p-6">
                     {/* Page Header */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-2">My Shelf</h1>
-                        <p className="text-gray-600">
-                            {books.length} book{books.length !== 1 ? 's' : ''} in your collection
-                        </p>
+                    <div className="mb-8 flex justify-between md:items-center">
+                        {/* Header */}
+                        <div>
+                            <h1 className="text-3xl font-bold text-gray-800 mb-2">My Shelf</h1>
+                            <p className="text-gray-600">
+                                {books.length} book{books.length !== 1 ? 's' : ''} in your collection
+                            </p>
+                        </div>
+
+                        {/* AI Recommendation button */}
+                        <div className="ml-8">
+                            <button
+                                className="bg-green-600 hover:bg-green-700 text-white font-semibold md:px-6 md:py-3 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-lg flex items-center md:gap-2 border border-green-500 cursor-pointer"
+                                onClick={(e) => handleAiRecommends(e)}
+                            >
+                                {aiRecommendationLoading ?
+                                    <Spinner color='success' aria-label="Extra small spinner example" size="xs" />
+                                    :
+                                    <svg
+                                        className="w-6 h-6 mx-1  md:w-5 md:h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                                        />
+                                    </svg>
+
+                                }
+                                Discover More
+                            </button>
+                        </div>
                     </div>
 
                     {/* Search, Sort, Filter Controls */}
